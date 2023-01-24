@@ -48,7 +48,19 @@ func main() {
 }
 
 func printHelpMenu() {
-	fmt.Print("Jugg Serial Port tool - V0.0 \r\n\r\nUsage: jugg [mode] [arguments] \r\n\r\nModes: \r\n  list		List the available serial port \r\n  monitor	Monitors the activity on a serial port \r\n\r\nArguments:\r\n\r\n  --help	-h 	display this help menu\r\n  --port	-p	set the serial port\r\n  --baud	-b	set the baud rate\r\n  --output	-o	output file\r\n")
+	fmt.Println("Jugg Serial Port tool - V0.0.0 \r\n")
+
+	fmt.Println("Usage: jugg [mode] [arguments] \r\n")
+	
+	fmt.Println("Modes:")
+	fmt.Println("  list		List the available serial port")
+	fmt.Println("  monitor	Monitors the activity on a serial port \r\n")
+
+	fmt.Println("Arguments:")
+	fmt.Println("  --help	-h 	display this help menu")
+	fmt.Println("  --port	-p	set the serial port")
+	fmt.Println("  --baud	-b	set the baud rate")
+	fmt.Println("  --output	-o	output file")	
 }
 
 func listDevices() {
