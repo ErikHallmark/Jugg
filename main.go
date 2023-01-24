@@ -16,6 +16,7 @@ func main() {
 	var port = flag.StringP("port", "p", "COM5", "The com port you wish to access")
 	var baud = flag.IntP("baud", "b", 9600,"Baud Rate")
 	var help = flag.BoolP("help", "h", false, "Display help menu")
+	var file = flag.StringP("output", "o", "", "Output file")
 
 	flag.Parse();
 
@@ -30,7 +31,7 @@ func main() {
 	switch command{
 
 	case "monitor":
-		monitor(port, baud);
+		monitor(*port, baud, *file);
 		break;
 
 	case "list":
@@ -47,7 +48,7 @@ func main() {
 }
 
 func printHelpMenu() {
-	fmt.Print("Jugg Serial Port tool - V0.0 \r\n\r\nUsage: jugg [mode] [arguments] \r\n\r\nModes: \r\n  list		List the available serial port \r\n  monitor	Monitors the activity on a serial port \r\n\r\nArguments:\r\n\r\n  --help -h 	display this help menu\r\n  --port -p	set the serial port\r\n  --baud -b	set the baud rate\r\n")
+	fmt.Print("Jugg Serial Port tool - V0.0 \r\n\r\nUsage: jugg [mode] [arguments] \r\n\r\nModes: \r\n  list		List the available serial port \r\n  monitor	Monitors the activity on a serial port \r\n\r\nArguments:\r\n\r\n  --help	-h 	display this help menu\r\n  --port	-p	set the serial port\r\n  --baud	-b	set the baud rate\r\n  --output	-o	output file\r\n")
 }
 
 func listDevices() {
@@ -66,8 +67,19 @@ func listDevices() {
 	}
 }
 
-func monitor(port *string, baud *int) {
-	c := &serial.Config{Name: *port, Baud: *baud}
+func monitor(port string, baud *int, file string) {
+	var output = file != "";
+	var f *os.File
+	if output {
+		var err error
+		f, err = os.Create(file);
+
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	c := &serial.Config{Name: port, Baud: *baud}
 	s, err := serial.OpenPort(c)
 	
 	if err != nil {
@@ -81,7 +93,14 @@ func monitor(port *string, baud *int) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("%s", buf[:n])
+		var output = fmt.Sprintf("%s", buf[:n])
+		fmt.Print(output)
+
+		_, err = f.WriteString(output)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 	}
 }
 
