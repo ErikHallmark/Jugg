@@ -17,6 +17,7 @@ func main() {
 	var baud = flag.IntP("baud", "b", 9600,"Baud Rate")
 	var help = flag.BoolP("help", "h", false, "Display help menu")
 	var file = flag.StringP("output", "o", "", "Output file")
+	var silent = flag.BoolP("silent", "s", false, "Silent the output")
 
 	flag.Parse();
 
@@ -31,7 +32,7 @@ func main() {
 	switch command{
 
 	case "monitor":
-		monitor(*port, baud, *file);
+		monitor(*port, baud, *file, *silent);
 		break;
 
 	case "list":
@@ -61,6 +62,7 @@ func printHelpMenu() {
 	fmt.Println("  --port	-p	set the serial port")
 	fmt.Println("  --baud	-b	set the baud rate")
 	fmt.Println("  --output	-o	output file")	
+	fmt.Println("  --silent	-s	silent the output")
 }
 
 func listDevices() {
@@ -79,10 +81,10 @@ func listDevices() {
 	}
 }
 
-func monitor(port string, baud *int, file string) {
-	var output = file != "";
+func monitor(port string, baud *int, file string, beSilent bool) {
+	var doOutput = file != "";
 	var f *os.File
-	if output {
+	if doOutput {
 		var err error
 		f, err = os.Create(file);
 
@@ -106,13 +108,17 @@ func monitor(port string, baud *int, file string) {
 			log.Fatal(err)
 		}
 		var output = fmt.Sprintf("%s", buf[:n])
-		fmt.Print(output)
-
-		_, err = f.WriteString(output)
-		if err != nil {
-			log.Fatal(err)
+		
+		if !beSilent{
+			fmt.Print(output)
 		}
 
+		if doOutput {
+			_, err = f.WriteString(output)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 	}
 }
 
