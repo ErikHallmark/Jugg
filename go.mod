@@ -1,4 +1,4 @@
-module github.com/ErikHallmark/Jugg
+module github.com/erikhallmark/jugg
 
 go 1.19
 
