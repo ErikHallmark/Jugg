@@ -59,11 +59,11 @@ func main() {
 }
 
 func monitorPort(args cmdArgs) {
-	incoming := make(chan []byte)
-	jugg.MonitorPort(args.port, args.baudRate, incoming)
+	incoming := make(chan jugg.PortData)
+	go jugg.MonitorPort(args.port, args.baudRate, incoming)
 
 	for {
-		data := <-incoming
+		data := <-incoming.data
 		fmt.Printf("%s", data)
 	}
 }
