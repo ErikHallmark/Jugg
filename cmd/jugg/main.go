@@ -5,20 +5,21 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	"github.com/erikhallmark/jugg"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/pflag"
 )
 
 type cmdArgs struct {
 	port       string
 	outputFile string
-
-	baudRate int
-
-	silent bool
-	help   bool
+	baudRate   int
+	silent     bool
+	verbose    bool
+	help       bool
 }
 
 func main() {
@@ -31,6 +32,7 @@ func main() {
 
 	pflag.BoolVarP(&args.silent, "silent", "s", false, "Used to silence the console output")
 	pflag.BoolVarP(&args.help, "help", "h", false, "Show the help menu")
+	pflag.BoolVarP(&args.verbose, "verbose", "v", false, "show more details")
 
 	pflag.Parse()
 
@@ -63,12 +65,13 @@ func monitorPort(args cmdArgs) {
 	go jugg.MonitorPort(args.port, args.baudRate, incoming)
 
 	for {
-		if incoming.Err != nil {
-			log.Fatal(incoming.Err)
+		update := <-incoming
+
+		if update.Err != nil {
+			log.Fatal(update.Err)
 		}
 
-		data := <-incoming.Data
-		fmt.Printf("%s", data)
+		fmt.Printf("%s", update.Data)
 	}
 }
 
@@ -82,12 +85,44 @@ func listDevices(args cmdArgs) {
 		fmt.Println("No serial devices found")
 	}
 
-	for i := 0; i < len(devices); i++ {
-		var details = devices[i]
-		var name = details.Name
-		var product = details.Product
-		fmt.Printf("(%02d) %s - %s", i, name, product)
+	data := make([][]string, len(devices))
+	table := tablewriter.NewWriter((os.Stdout))
+
+	if args.verbose {
+		for i := 0; i < len(devices); i++ {
+			device := devices[i]
+			data[i] = []string{device.Name,
+				device.Product,
+				device.VID,
+				device.PID,
+				device.SerialNumber,
+				strconv.FormatBool(device.IsUSB)}
+		}
+
+		table.SetHeader([]string{"Name", "Product", "VID", "PID", "Serial#", "USB?"})
+	} else {
+		for i := 0; i < len(devices); i++ {
+			device := devices[i]
+			data[i] = []string{device.Name,
+				device.Product}
+		}
+
+		table.SetHeader([]string{"Name", "Product"})
 	}
+
+	table.SetBorder(false)
+	table.AppendBulk(data)
+	table.Render()
+
+	// for i := 0; i < len(devices); i++ {
+	// 	var details = devices[i]
+
+	// 	if args.verbose {
+
+	// 	} else {
+	// 		fmt.Printf("(%02d) %s - %s \r\n", i, details.Name, details.Product)
+	// 	}
+	// }
 
 }
 
