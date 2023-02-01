@@ -25,7 +25,7 @@ func main() {
 	initCloseHandler()
 	var args cmdArgs
 	pflag.StringVarP(&args.port, "port", "p", "", "The com port you want to connect to")
-	pflag.StringVarP(&args.outputFile, "output", "p", "", "The name of a file you'd like Jugg to output too")
+	pflag.StringVarP(&args.outputFile, "output", "o", "", "The name of a file you'd like Jugg to output too")
 
 	pflag.IntVarP(&args.baudRate, "baud", "b", 115200, "The baud rate of the device your connecting to (default is 115200)")
 
@@ -43,10 +43,10 @@ func main() {
 
 	switch mode {
 	case "monitor":
-		break
+		monitorPort(args)
 
 	case "list":
-		break
+		listDevices(args)
 
 	default:
 		if mode == "" {
@@ -58,21 +58,31 @@ func main() {
 
 }
 
-func ListDevices(args cmdArgs) {
+func monitorPort(args cmdArgs) {
+	incoming := make(chan []byte)
+	jugg.MonitorPort(args.port, args.baudRate, incoming)
+
+	for {
+		data := <-incoming
+		fmt.Printf("%s", data)
+	}
+}
+
+func listDevices(args cmdArgs) {
 	var devices, err = jugg.ListDevices()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if len(list) == 0 {
+	if len(devices) == 0 {
 		fmt.Println("No serial devices found")
 	}
 
-	for i := 0; i < len(list); i++ {
+	for i := 0; i < len(devices); i++ {
 		var details = devices[i]
 		var name = details.Name
 		var product = details.Product
-		fmt.Printf("(%s) %s - %s", i, name, product)
+		fmt.Printf("(%02d) %s - %s", i, name, product)
 	}
 
 }

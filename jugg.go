@@ -17,6 +17,26 @@ func ListDevices() ([]*PortDetails, error) {
 	return list, err
 }
 
+func MonitorPort(port string, baud int, data chan []byte) {
+	c := &serial.Config{Name: port, Baud: baud}
+	s, err := serial.OpenPort(c)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for true {
+		buf := make([]byte, 128)
+		n, err := s.Read(buf)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		data <- buf[:n]
+	}
+}
+
 func Monitor(port string, baud *int, file string, beSilent bool) {
 	var doOutput = file != ""
 	var f *os.File
