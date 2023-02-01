@@ -63,7 +63,11 @@ func monitorPort(args cmdArgs) {
 	go jugg.MonitorPort(args.port, args.baudRate, incoming)
 
 	for {
-		data := <-incoming.data
+		if incoming.Err != nil {
+			log.Fatal(incoming.Err)
+		}
+
+		data := <-incoming.Data
 		fmt.Printf("%s", data)
 	}
 }

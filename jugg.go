@@ -11,21 +11,26 @@ import (
 
 type PortDetails = enumerator.PortDetails
 
+type PortData struct {
+	Data []byte
+	Err  error
+}
+
 func ListDevices() ([]*PortDetails, error) {
 	//TODO: Deal with potential errors
 	var list, err = enumerator.GetDetailedPortsList()
 	return list, err
 }
 
-func MonitorPort(port string, baud int, data chan []byte) {
+func MonitorPort(port string, baud int, output chan PortData) {
 	c := &serial.Config{Name: port, Baud: baud}
 	s, err := serial.OpenPort(c)
 
 	if err != nil {
-		log.Fatal(err)
+		output <- PortData{Data: nil, Err: err}
 	}
 
-	for true {
+	for {
 		buf := make([]byte, 128)
 		n, err := s.Read(buf)
 
@@ -33,7 +38,7 @@ func MonitorPort(port string, baud int, data chan []byte) {
 			log.Fatal(err)
 		}
 
-		data <- buf[:n]
+		output <- PortData{Data: buf[:n], Err: nil}
 	}
 }
 
