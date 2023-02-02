@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 
 	"github.com/erikhallmark/jugg"
@@ -64,14 +65,30 @@ func monitorPort(args cmdArgs) {
 	incoming := make(chan jugg.PortData)
 	go jugg.MonitorPort(args.port, args.baudRate, incoming)
 
+	var f *os.File
+	if args.outputFile != "" {
+		var err error
+		f, err = os.Create(args.outputFile)
+		if err != nil {
+			log.Fatal()
+		}
+	}
+
 	for {
 		update := <-incoming
-
+		output := string(update.Data)
 		if update.Err != nil {
 			log.Fatal(update.Err)
 		}
-
-		fmt.Printf("%s", update.Data)
+		if !args.silent {
+			fmt.Print(output)
+		}
+		if args.outputFile != "" {
+			_, err := f.WriteString(output)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 	}
 }
 
@@ -86,7 +103,8 @@ func listDevices(args cmdArgs) {
 	}
 
 	data := make([][]string, len(devices))
-	table := tablewriter.NewWriter((os.Stdout))
+	tableString := &strings.Builder{}
+	table := tablewriter.NewWriter((tableString))
 
 	if args.verbose {
 		for i := 0; i < len(devices); i++ {
@@ -114,15 +132,16 @@ func listDevices(args cmdArgs) {
 	table.AppendBulk(data)
 	table.Render()
 
-	// for i := 0; i < len(devices); i++ {
-	// 	var details = devices[i]
+	if !args.silent {
+		fmt.Print(tableString.String())
+	}
 
-	// 	if args.verbose {
-
-	// 	} else {
-	// 		fmt.Printf("(%02d) %s - %s \r\n", i, details.Name, details.Product)
-	// 	}
-	// }
+	if args.outputFile != "" {
+		err := os.WriteFile(args.outputFile, []byte(tableString.String()), 0666)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 }
 
