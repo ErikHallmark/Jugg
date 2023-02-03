@@ -37,5 +37,6 @@ func MonitorPort(port string, baud int, output chan PortData) {
 		}
 
 		output <- PortData{Data: buf[:n], Err: nil}
+
 	}
 }
