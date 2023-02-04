@@ -16,6 +16,7 @@ import (
 
 type cmdArgs struct {
 	outputFile string
+	inputFile  string
 	silent     bool
 	verbose    bool
 	help       bool
@@ -24,11 +25,12 @@ type cmdArgs struct {
 func main() {
 	initCloseHandler()
 	var args cmdArgs
-	pflag.StringVarP(&args.outputFile, "output", "o", "", "The name of a file you'd like Jugg to output too")
+	pflag.StringVarP(&args.outputFile, "output", "o", "", "output file")
+	pflag.StringVarP(&args.inputFile, "input", "i", "", "input file")
 
-	pflag.BoolVarP(&args.silent, "silent", "s", false, "Used to silence the console output")
+	pflag.BoolVarP(&args.silent, "silent", "s", false, "silence the output")
 	pflag.BoolVarP(&args.help, "help", "h", false, "Show the help menu")
-	pflag.BoolVarP(&args.verbose, "verbose", "v", false, "show more details")
+	pflag.BoolVarP(&args.verbose, "verbose", "v", false, "show more details when available")
 
 	pflag.Parse()
 
@@ -46,11 +48,14 @@ func main() {
 	case "list":
 		listDevices(args)
 
+	case "send":
+		send(args)
+
 	default:
 		if mode == "" {
 			fmt.Println("Please specify a mode")
 		} else {
-			fmt.Printf("%s is not a recognized mode. Use jugg --help for usage details", mode)
+			fmt.Printf("%s is not a recognized mode. Use jugg --help for usage details \r\n ", mode)
 		}
 	}
 
@@ -91,6 +96,28 @@ func monitorPort(args cmdArgs) {
 			}
 		}
 	}
+}
+
+func send(args cmdArgs) {
+	port := pflag.Arg(1)
+	baudRate, err := strconv.Atoi(pflag.Arg(2))
+	data := []byte(pflag.Arg(3))
+
+	if args.inputFile != "" {
+		f, err := os.ReadFile(args.inputFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		data = f
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	jugg.SendData(port, baudRate, []byte(data))
+
 }
 
 func listDevices(args cmdArgs) {
@@ -152,18 +179,24 @@ func printHelpMenu(mode string) {
 		fmt.Println("Jugg Serial Port tool")
 		fmt.Println("Usage: jugg [mode] <arguments> [options]")
 		fmt.Println("Modes:")
-		fmt.Println("  list		List the available serial port")
+		fmt.Println("  list		List the available serial ports")
 		fmt.Println("  monitor	Monitors the activity on a serial port ")
+		fmt.Println("  send		Send data to a serial port")
 		fmt.Println("Arguments:")
 		fmt.Println("  --help	-h 	display this help menu")
 		fmt.Println("  --output	-o	output file")
+		fmt.Println("  --input	-i	input file")
 		fmt.Println("  --silent	-s	silent the output")
+		fmt.Println("  --verbose	-v 	output more data when available")
 
 	case "monitor":
 		fmt.Println("Usage:	jugg monitor <port name> <baud rate> [options]")
 
 	case "list":
 		fmt.Println("Usage: jugg list [options]")
+
+	case "send":
+		fmt.Println("Usage: jugg send <port name> <baud rate> <data> [options]")
 
 	default:
 		fmt.Printf("%s is not recognized \r\n", mode)

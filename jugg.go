@@ -40,3 +40,16 @@ func MonitorPort(port string, baud int, output chan PortData) {
 
 	}
 }
+
+func SendData(port string, baud int, data []byte) (n int, err error) {
+	c := &serial.Config{Name: port, Baud: baud}
+	s, err := serial.OpenPort(c)
+
+	if err != nil {
+		return 0, err
+	}
+
+	n, err = s.Write(data)
+	s.Close()
+	return n, err
+}
