@@ -8,9 +8,11 @@ require (
 	go.bug.st/serial v1.5.0
 )
 
+require github.com/rivo/uniseg v0.4.3 // indirect
+
 require (
 	github.com/creack/goselect v0.1.2 // indirect
-	github.com/mattn/go-runewidth v0.0.9 // indirect
-	github.com/olekukonko/tablewriter v0.0.5 // indirect
+	github.com/mattn/go-runewidth v0.0.14 // indirect
+	github.com/olekukonko/tablewriter v0.0.5
 	golang.org/x/sys v0.4.0 // indirect
 )

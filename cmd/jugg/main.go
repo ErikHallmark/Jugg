@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"log"
 	"os"
@@ -15,12 +16,16 @@ import (
 )
 
 type cmdArgs struct {
-	outputFile string
-	inputFile  string
-	silent     bool
-	verbose    bool
-	help       bool
+	outputFile  string
+	inputFile   string
+	silent      bool
+	verbose     bool
+	help        bool
+	showVersion bool
 }
+
+//go:embed version.txt
+var version string
 
 func main() {
 	initCloseHandler()
@@ -31,6 +36,7 @@ func main() {
 	pflag.BoolVarP(&args.silent, "silent", "s", false, "silence the output")
 	pflag.BoolVarP(&args.help, "help", "h", false, "Show the help menu")
 	pflag.BoolVarP(&args.verbose, "verbose", "v", false, "show more details when available")
+	pflag.BoolVar(&args.showVersion, "version", false, "print the version number")
 
 	pflag.Parse()
 
@@ -38,6 +44,11 @@ func main() {
 
 	if args.help {
 		printHelpMenu(pflag.Arg(0))
+		os.Exit(0)
+	}
+
+	if args.showVersion {
+		fmt.Println(version)
 		os.Exit(0)
 	}
 
@@ -188,6 +199,7 @@ func printHelpMenu(mode string) {
 		fmt.Println("  --input	-i	input file")
 		fmt.Println("  --silent	-s	silent the output")
 		fmt.Println("  --verbose	-v 	output more data when available")
+		fmt.Println("  --version		print the version number")
 
 	case "monitor":
 		fmt.Println("Usage:	jugg monitor <port name> <baud rate> [options]")
