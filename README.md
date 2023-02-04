@@ -3,18 +3,16 @@ A serial port tool written in Golang
 
 
 ```
-Jugg Serial Port tool - V0.0.1
-
-Usage: jugg [mode] [arguments]
-
+Jugg Serial Port tool
+Usage: jugg [mode] <arguments> [options]
 Modes:
-  list          List the available serial port
-  monitor       Monitors the activity on a serial port
-
+  list		List the available serial ports
+  monitor	Monitors the activity on a serial port 
+  send		Send data to a serial port
 Arguments:
-
-  --help        -h      display this help menu
-  --port        -p      set the serial port
-  --baud        -b      set the baud rate
-  --output      -o      output file
+  --help	-h 	display this help menu
+  --output	-o	output file
+  --input	-i	input file
+  --silent	-s	silent the output
+  --verbose	-v 	output more data when available
 ```
