@@ -3,6 +3,13 @@ A simple tool for debugging serial devices
 
 ![banner](images/Banner.jpg)
 
+## Installation
+```
+$ go install github.com/erikhallmark/jugg/cmd/jugg
+```
+
+## Help
+
 ```
 Jugg Serial Port tool
 Usage: jugg [mode] <arguments> [options]
