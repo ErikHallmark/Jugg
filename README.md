@@ -1,6 +1,7 @@
 # Jugg
-A serial port tool written in Golang
+A simple tool for debugging serial devices
 
+![banner](images/Banner.jpg)
 
 ```
 Jugg Serial Port tool
