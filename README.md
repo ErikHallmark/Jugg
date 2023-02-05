@@ -5,7 +5,7 @@ A simple tool for debugging serial devices
 
 ## Installation
 ```
-$ go install github.com/erikhallmark/jugg/cmd/jugg
+$ go install github.com/erikhallmark/jugg/cmd/jugg@latest
 ```
 
 ## Help
